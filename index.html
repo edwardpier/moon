@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mooooooo</title>
+        <style>
+        .controls {
+            display: grid;
+            grid-template-columns: max-content auto;
+        }
+        .plane {
+            width: 100%;
+        }
+        </style>
+    </head>
+    <body>
+    
+        <script src="state.js"></script>
+        <script src="simulation.js"></script>
+        <script src="display.js"></script>
+        <script>
+
+        /*********
+        * bodies *
+        *********/
+        const earth = new Body("Earth", 5.9722e24, 6.357e6, 
+                               new StationaryPath(0.0, 0.0, 0.0));
+        
+        const moon = new Body("Moon", 7.34e22, 1.738e6, 
+                              new CircularPath(3.84401e8, -2.360591597e6,
+                                               0.0, 0.0, 0.0, 0.0));
+                                               
+        const system = new BodySystem();
+        system.add(earth);
+        system.add(moon);
+                
+        /*********
+        * rocket *
+        *********/
+        const acc = new CompositeAccelerator();
+        const rocket = new Rocket(acc, 0.0, -earth.radius, 0.0, 0.0);
+                                         
+        rocket.addStage(new Stage(1e6, 3.0e6, 455.*9.81, 5.0e3, 2e5, 2e7 ) );
+        rocket.addStage(new Stage(5e5, 5.0e6, 455.*9.81, 4.0e4, 2e5, 2e7 ) );
+        rocket.addStage(new Stage(5e6, 1.5e8, 455.*9.81, 5.0e5, 2e6, 2e8) ); // stage 1                                         
+                                         
+        const atmosphere = new Atmosphere(rocket, earth, 1.225e-3, 2.7e3);
+        acc.add(earth);
+        acc.add(moon);
+        acc.add(atmosphere);
+        
+        /********
+        * clock *
+        ********/
+        clock = new AdjustableClock();
+        
+        /******************
+        * throttle slider *
+        ******************/
+        const throttle_slider = document.createElement('input');
+        throttle_slider.type = 'range';
+        throttle_slider.min =   0;
+        throttle_slider.max = 100;
+        throttle_slider.value = 0;
+        throttle_slider.addEventListener('input', (event) => {
+            const value = event.target.value/100.0;
+            if(value>0.0) clock.setRate(1.0);
+            rocket.setThrottle(value); 
+        });
+        
+        throttle_slider.setAttribute('style', 'width: 100%');
+        
+        rocket.setThrottleResetCallback(() => {
+            //console.log("zeroing throttle slider");
+            throttle_slider.value = 0;
+        });
+        
+        /*****************
+        * clock controls *
+        *****************/
+        const clock_rate = document.createTextNode(' 1x ');
+        
+        const faster_button = document.createElement('button');
+        faster_button.appendChild(document.createTextNode('Faster'));
+        faster_button.addEventListener('click', () => {
+        
+            let rate = clock.rate*2.0;
+            
+            if(rocket.throttle == 0.0) {
+
+                const r = 10.0/plane.velocityToPixels(rocket.state);
+                console.log('r=',r);
+                if(r>rate && r<100000) rate = r;
+            }
+                
+            clock.setRate(rate);
+            clock_rate.nodeValue = ' '+Math.round(rate)+'x ';
+        });
+        
+        
+        
+        const slower_button = document.createElement('button');
+        slower_button.appendChild(document.createTextNode('Slower')); 
+        slower_button.addEventListener('click', () => { 
+            const rate = clock.rate/2.0;
+            clock.setRate(rate);
+            clock_rate.nodeValue = ' '+Math.round(rate)+'x ';
+        });
+        
+        const realtime_button = document.createElement('button');
+        realtime_button.appendChild(document.createTextNode('Real Time'));
+        realtime_button.addEventListener('click', () => { 
+            clock.setRate(1.0);
+            clock_rate.nodeValue = ' 1x ';
+        });        
+        
+        clock_display = new ClockDisplay(clock);
+        
+        
+        /********
+        * plane *
+        ********/
+        const plane = new Plane(1200, 800, system);
+        
+        plane.add(new BodyElement(earth));
+        plane.add(new BodyElement(moon));
+        plane.add(new RocketElement(rocket));
+        plane.add(new OrbitElement(rocket, system));
+        plane.add(new ThrustLabel(rocket));
+        plane.add(new DragLabel(rocket, atmosphere));
+        plane.add(new VelocityLabel(rocket, system));
+        plane.add(new FuelIndicator(rocket));
+        
+        plane.onCenter(() => {
+            const pos = rocket.state.x;
+            plane.centerOn(pos[0], pos[1], rocket.state.time);
+        
+        });
+        
+        /*************
+        * key events *
+        *************/
+        document.addEventListener('keypress', (event) => {
+            const key = event.key;
+            
+            if(key == '-' || key == '_') {
+                plane.zoomOut();
+                
+            } else if(key == '+' || key == '=') {
+                plane.zoomIn();
+                
+            } else if(key == ',' || key == '<' || key == 'j') {
+                rocket.rotateLeft();
+                
+            } else if(key == '.' || key == '>' || key == 'l') {
+                rocket.rotateRight();
+                
+            } else if(key == 'i') {
+                let throttle = parseInt(throttle_slider.value) + 1;
+                if(throttle>100) throttle = 100;
+                
+                throttle_slider.value = throttle;
+                rocket.setThrottle(throttle/100.0);
+                if(throttle>0) clock.setRate(1.0);
+                
+            } else if(key == 'k') {
+                let throttle = parseInt(throttle_slider.value) - 1;
+                if(throttle <0) throttle = 0;
+                
+                throttle_slider.value = throttle;
+                rocket.setThrottle(throttle/100.0);
+                if(throttle>0) clock.setRate(1.0);
+            }
+        });
+        
+
+        /**************
+        * HTML layout *
+        **************/
+        const controls = document.createElement('DIV');
+        controls.className = 'controls';
+        
+        const bottom = document.createElement('DIV');
+        bottom.className = 'plane';
+        
+        document.body.appendChild(controls);
+        document.body.appendChild(bottom);
+        
+        left = document.createElement('DIV');
+        left.className = 'clock';
+        
+        right = document.createElement('DIV');
+        right.className = 'throttle';
+        
+        controls.appendChild(left);
+        controls.appendChild(right);
+        
+        left.appendChild(clock_display.getElement());
+        left.appendChild(faster_button);
+        left.appendChild(slower_button);
+        left.appendChild(realtime_button);
+        left.appendChild(clock_rate);
+        
+        right.appendChild(throttle_slider);
+        
+        bottom.appendChild(plane.svg);
+        
+
+        
+/*        const pos = rocket.state.x;
+        plane.setCenter(pos[0], pos[1]); */       
+        
+
+        
+        /************
+        * integrate *
+        ************/
+        real_time = new RealtimeClock();
+        
+        let last_time = 0.0;
+        
+        function update() {
+
+            time = clock.getTime();
+            plane.update(time);
+            
+            setTimeout(update, 100);
+        }
+        
+        setTimeout(update, 100);
+
+        </script>
+        
+    </body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>About</title>
+        <style>
+        </style>
+    </head>
+    <body>
+    <h1>What is it?</h1>
+    <p>
+    This is a rocket simulation. The objective is to fly from the Earth to the surface of the Moon and then return to Earth. In the process you can learn a lot about orbital dynamics. And of course you can do anything else you want with your rocket, within the bounds of physics. 
+    </p>
+    <h1>How do I do it?</h1>
+    <p>
+    The important controls are mapped to your keyboard. The j and l keys rotate your rocket left and right. The i and k keys control the throttle, along with a slider at the top. The _/- key zooms out the display and the +/= key zooms in. You can drag the display with your mouse and a double click centers on the rocket.
+    It takes days to get to the Moon. While you can do it all in real time if you are hard core, most people don't have the patience for that. So there are on-screen buttons to speed up and slow down time. You can't go slower than real time. 
+    </p><p>
+    The screen shows your rocket as a line. Your rocket has three stages that automatically
+    separate when they run out of fuel. The line gets shorter each time you jettison a stage.
+    The red line shows your current Keplerian orbit around the body with the strongest local gravity, and you have helpful displays of remaining fuel, thrust and atmospheric drag (if there is any). When you are within 10 km of a surface, you see your velocity. This is green when you are going slow enough to land safely, and red when you are going too fast. It is black when you are moving away from the surface.
+    </p>
+    <h1>Physics</h1>
+    <p>
+    The underlying physics is about as accurate as it could be. It uses true multi-body gravity,  
+    unlike Kerbal Space Program, which only considers the body with the strongest gravity.
+    The differential equations are integrated with a Fifth order Runge-Kutta integrator. While there are better techniques, it is well suited to this sort of real-time simulation, where the time steps are necessarily short. The density of the atmosphere falls off exponentially with a characteristic scale based on something I read in a book in the 1980s. So perhaps that could be better, but it accurately captures the essence of aerobraking, re-entry, and the need to get above the atmosphere before you can thrust sideways to get into orbit.
+    <p></p>
+    The rocket is inspired by the Apollo program, but only loosely. Simulating lunar orbit rendezvous would require a way to control two independent craft. So the same vehicle goes to the Moon, lands, and returns to Earth. There is no parachute, so you need to land on rocket thrust. All three stages use liquid hydrogen fuel with exhaust velocity set to the theoretical maximum determined from its specific impulse. That's a bit optimistic, but it compensates for the other simplifications.
+    </p></p>
+    Spacecraft aerodynamics are greatly simplified. Each stage has a constant cross-sectional area and drag coefficient, and there is no consideration for moving through the speed of sound. You can rotate the spacecraft to thrust in any direction even when moving through an atmosphere. 
+    </p>
+    <h1>History</h1>
+    <p>
+    I was four years old when Apollo 11 landed on the moon. My childhood was full of televised rocket launches and Moon landings. My first awareness of conservation of momentum came from the Asteroids arcade game, which I must have seen shortly after it came out in 1979, though I probably only played it once or twice. Later in life I had a board game called 
+    <a href="https://en.wikipedia.org/wiki/Mayday_(game)">Mayday</a>, that was meant to be a spaceship combat companion to the Traveller role playing game. You tracked velocity vectors by using two pieces - one to mark the current position of a spaceship and another to mark the future position at the end of the next turn. You accellerated by moving the future position. It was an elegant way to represent vector physics that I found facinating. I followed in the footsteps of Gauss by deriving the formula for a sum of integers, which is the discrete analog of integerating 1/2at<sup>2</sup>. 
+    </p><p>
+    In the early 1980s my high school got a room full of Commodore Pets and taught a class in Basic. The first version of what you see here was a simulation of an object orbiting the Earth. It did simple forward differencing (i.e. x = x + v*dt, v = v + a*dt), but it worked. The orbits were more or less closed ellipses and the satellite moved slower when it was farther from the Earth. 
+     </p><p>
+    If you are old or part of the retro computing crowd (two populations with a lot of overlap) you may remember that the Pet did not have pixel level graphics. You could only control the character displayed in each of its 40 columns. But it had a special character set that included all 16 possible combination of half-character blocks. I wrote the first subroutine of my life to choose the correct characters to simulate "high resolution" graphics with 80 pixels across the screen.
+    </p><p>
+    My mother was a teacher, and not long after writing my orbit simulator, her school got some Atari computers. She brought home an Atari 400 to evaluate. That machine had pixel level graphics and sound - pretty advanced for the time! So the next version of my code had a rocket with controllable thrust and air resistance. You took off from the surface of the Earth and tried to get to orbit. It had real graphics and the rocket made a low rumbling sound that got louder when you throttled up.
+     </p><p>
+    The 400 had this horrible hard plastic membrane keyboard. I still remember how my fingers ached after developing code on it. But then my mother brought home an Atari 800 - essentially the same machine with a real keyboard. Still, nobody could watch TV while I was trying to get to orbit. If you don't understand why, ask an old person.
+    </p><p>
+    I barely touched a computer throughout college. It wasn't until grad school when I was writing physics simulations in K&amp;R C on a Sun workstation. Well, my advisor had the workstation,but I could telnet to it from a VT100 terminal. Green phosphor and everything.
+    After a post-doc I got my first real job working on the data processing pipeline for a US-Japanese orbiting X-ray telescope. 
+    </p><p>
+    The remarkable thing about that job was that once the pipeline was running, there wasn't much to do. This was in the 1990s when Java came out. I loved that language. You could do really clean object-oriented design, and it had built-in packages to do <em>anything</em>. I wrote tons of very cool Java programs that has nothing to do with work. I wrote a Postscript interpreter, an Ogg-Vorbis decoder, a version of the Risk board game with pluggable AIs that I could play against, an equation parser and interpreter, and a plotting program patterned after <a href="https://www.astro.princeton.edu/~rhl/sm/">SuperMongo</a> that I use to this day. 
+     </p><p>
+    Around the turn of the millenium I revised my old rocket simulator. By then I knew a thing or two about numerical methods, so it had a fifth order Runge-Kutta integrator, and computers were fast enough that the time steps were much faster than a second. I was using a Sun UltraSparc 5. I remembered being impressed that the integration was so accurate that once I got above the atmosphere, the orbit did not decay from numerical error like it did on the old Atari. I added the Moon and figured out how to determine orbits from conservation of energy and angular momentum.
+    </p><p>
+    The Java program still runs, but lately I have been enjoying JavaScript. It is the single best way in the history of computing to deploy software so that other people can use it. You are reading this, so see?, it worked. The current version is a close JavaScript port of the Java code. I improved the user interface by moving nearly all readouts to the graphics display and the controls to the keyboard. But the core is pretty much identical to the Java version.
+    </p>
+
+    </body>
+</html>
