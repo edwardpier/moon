@@ -974,7 +974,12 @@ class ThrustLabel extends LabelElement {
         
         const stage = rocket.getStage();
         const rate = rocket.throttle* stage.peak_flow;
-        const thrust = this.rocket.thrust(rocket.state.time, rate)/9.81;
+        
+        let thrust = 0.0;
+        if(stage.fuel>0.0) {
+            thrust = this.rocket.thrust(rocket.state.time, rate)/9.81;
+        }
+        
         this.setText('Thrust: '+thrust.toFixed(2));
         
     }

@@ -5,7 +5,8 @@
         <style>
         .controls {
             display: grid;
-            grid-template-columns: max-content auto;
+            grid-template-columns: max-content auto max-content;
+            column-gap: 12pt
         }
         .plane {
             width: 100%;
@@ -13,7 +14,6 @@
         </style>
     </head>
     <body>
-    
         <script src="state.js"></script>
         <script src="simulation.js"></script>
         <script src="display.js"></script>
@@ -39,8 +39,9 @@
         const acc = new CompositeAccelerator();
         const rocket = new Rocket(acc, 0.0, -earth.radius, 0.0, 0.0);
                                          
-        rocket.addStage(new Stage(1e6, 3.0e6, 455.*9.81, 5.0e3, 2e5, 2e7 ) );
-        rocket.addStage(new Stage(5e5, 5.0e6, 455.*9.81, 4.0e4, 2e5, 2e7 ) );
+        //                                                      area                                 
+        rocket.addStage(new Stage(1e6, 3.0e6, 455.*9.81, 5.0e3, 4e5, 2e7) ); // stage 3
+        rocket.addStage(new Stage(5e5, 5.0e6, 455.*9.81, 4.0e4, 4e5, 2e7) ); // stage 2
         rocket.addStage(new Stage(5e6, 1.5e8, 455.*9.81, 5.0e5, 2e6, 2e8) ); // stage 1                                         
                                          
         const atmosphere = new Atmosphere(rocket, earth, 1.225e-3, 2.7e3);
@@ -114,6 +115,10 @@
         });        
         
         clock_display = new ClockDisplay(clock);
+        
+        const about_link = document.createElement('A')
+        about_link.href = 'about.html'
+        about_link.appendChild(document.createTextNode('About'))
         
         
         /********
@@ -191,8 +196,12 @@
         right = document.createElement('DIV');
         right.className = 'throttle';
         
+        link = document.createElement('DIV');
+        link.className = 'link';
+        
         controls.appendChild(left);
         controls.appendChild(right);
+        controls.appendChild(link);
         
         left.appendChild(clock_display.getElement());
         left.appendChild(faster_button);
@@ -201,6 +210,9 @@
         left.appendChild(clock_rate);
         
         right.appendChild(throttle_slider);
+        link.appendChild(about_link);
+        
+        
         
         bottom.appendChild(plane.svg);
         
@@ -223,10 +235,10 @@
             time = clock.getTime();
             plane.update(time);
             
-            setTimeout(update, 100);
+            setTimeout(update, 30);
         }
         
-        setTimeout(update, 100);
+        setTimeout(update, 30);
 
         </script>
         

@@ -668,10 +668,15 @@ class Orbit {
 
         const  l2 = lx*lx + ly*ly + lz*lz;
 
+        this.eccentricity2 = 1.0-l2/(body.GM*this.semi_major);
         this.eccentricity = Math.sqrt(1.0-l2/(body.GM*this.semi_major));
         
         this.semi_minor = this.semi_major*Math.sqrt(1.0-this.eccentricity*this.eccentricity);
+        //this.latus_rectum = this.semi_major*(1.0-this.eccentricity2);
         this.latus_rectum = this.semi_major*(1.0-this.eccentricity*this.eccentricity);
+        
+//         console.log('lr=',this.latus_rectum, 'vs', 
+//                     this.semi_major*(1.0-this.eccentricity*this.eccentricity), 'e=',this.eccentricity);
         
         /***************************
         * orientation of the orbit *
@@ -707,7 +712,9 @@ class Orbit {
         
         
         let r = this.latus_rectum/(1.0 + this.eccentricity*cos);
+        //console.log('r=',r);
         if(isNaN(r)) {
+            
             r = 2.0 * this.semi_major;
         }
         
