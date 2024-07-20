@@ -690,7 +690,7 @@ class OrbitPathElement extends PlaneElement {
         
         const orbit = this.orbit; 
 
-        if(orbit.latus_rectum == 0) {
+        if(orbit.latus_rectum <1e-3) {
             /****************
             * straight line *
             ****************/
@@ -735,7 +735,6 @@ class OrbitPathElement extends PlaneElement {
                 const pm = orbit.angleToPoint(theta);
                 const p = this.plane.toPixels(pm[0], pm[1], time);
                 
-                
                 if(path.length == 0) {
                     path += 'M '+p[0]+' '+p[1];
                 } else {
@@ -746,6 +745,8 @@ class OrbitPathElement extends PlaneElement {
             }
             
             path += ' Z';
+            
+            console.log(path);
 
             
             elem.setAttribute('d', path);

@@ -325,8 +325,9 @@ class Rocket {
         this.headingx = 0.0;
         this.headingy = -1.0;
         
-        this.sin_step = Math.sin(5.0/180.0*Math.PI);
-        this.cos_step = Math.cos(5.0/180.0*Math.PI);
+        const step = 1.0; // degrees
+        this.sin_step = Math.sin(step/180.0*Math.PI);
+        this.cos_step = Math.cos(step/180.0*Math.PI);
         
         /***********************
         * initialize the state *
@@ -667,23 +668,28 @@ class Orbit {
         const  lz = dx*vy - dy*vx;
 
         const  l2 = lx*lx + ly*ly + lz*lz;
+        
+        this.latus_rectum = l2/body.GM;
+        this.semi_minor = Math.sqrt(this.latus_rectum * this.semi_major)
 
-        this.eccentricity2 = 1.0-l2/(body.GM*this.semi_major);
-        this.eccentricity = Math.sqrt(1.0-l2/(body.GM*this.semi_major));
+        this.eccentricity = Math.sqrt(1.0 - this.latus_rectum/this.semi_major);
         
-        this.semi_minor = this.semi_major*Math.sqrt(1.0-this.eccentricity*this.eccentricity);
-        //this.latus_rectum = this.semi_major*(1.0-this.eccentricity2);
-        this.latus_rectum = this.semi_major*(1.0-this.eccentricity*this.eccentricity);
         
-//         console.log('lr=',this.latus_rectum, 'vs', 
-//                     this.semi_major*(1.0-this.eccentricity*this.eccentricity), 'e=',this.eccentricity);
+        console.log('lr=',this.latus_rectum, 'e=',this.eccentricity);
         
         /***************************
         * orientation of the orbit *
         ***************************/
         const a = this.semi_major;
         const e = this.eccentricity;
-        let delta = Math.acos((this.latus_rectum/r-1)/e);
+        
+        let delta = 0.0;
+        
+        if(this.latus_rectum < 1e-3) {
+            delta =   -Math.PI;
+        } else {
+            delta = Math.acos((this.latus_rectum/r-1)/e);
+        }
 
         // Now should this be positive or negative?
         const r_dot_v = dx*vx +  dy*vy +  dz*vz;
@@ -692,6 +698,8 @@ class Orbit {
 
         // now find the absolute angle
         this.angle = 180.0/Math.PI*(Math.atan2(dy,dx) - delta);  
+        
+        console.log('delta=', delta, 'dx', dx, 'dy', dy);
         
         //console.log(this.semi_major, this.eccentricity, this.angle);
         
@@ -704,18 +712,19 @@ class Orbit {
         
         const cos = Math.cos(Math.PI/180.*(theta - this.angle));
         
-        // a(1+e)(1-e)
-        //   (1+ecos)
-        
-        
-        //this.semi_major*(1.0-this.eccentricity*this.eccentricity);
-        
-        
-        let r = this.latus_rectum/(1.0 + this.eccentricity*cos);
-        //console.log('r=',r);
-        if(isNaN(r)) {
+        let r = 0.0
+        if(this.latus_rectum < 1.0) {
+            console.log('cos', cos, 'cos+1', cos+1, 'theta', theta, 'angle', this.angle);
+            if(cos == -1.0) {
+                r =  2.0*this.semi_major;
+            } else {
+                r =  0.0;
+            }
             
-            r = 2.0 * this.semi_major;
+        } else {
+
+            r = this.latus_rectum/(1.0 + this.eccentricity*cos);
+
         }
         
         const rad = theta/180.0*Math.PI;
